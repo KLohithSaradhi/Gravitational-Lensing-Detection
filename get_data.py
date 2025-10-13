@@ -33,17 +33,17 @@ def download_data(reference_path, parent_dir, LOG_INTERVAL=10):
                 imgs = SDSS.get_images(coordinates=pos, radius=20*u.arcsec, band=b, data_release=17)
                 imgs[0].writeto(os.path.join(dest_path, f"{b}_{i+1:06}.fits"), overwrite=True)
             except:
-                print(f"image not found :{i}")
+                print(f"image not found :{i}", flush=True)
                 IMAGE_FAIL += [i]
 
 
-        #JPEG
+        # #JPEG
         url = f"https://skyserver.sdss.org/dr17/SkyServerWS/ImgCutout/getjpeg?ra={ra}&dec={dec}&scale=0.4&width=512&height=512"
         r = requests.get(url)
         open(os.path.join(dest_path, f"{i+1:06}.jpg"), "wb").write(r.content)   
     
         if bar.n % LOG_INTERVAL == 0:
-            print(str(bar))
+            print(str(bar), flush=True)
 
     return QUERY_FAIL, IMAGE_FAIL
 
@@ -54,7 +54,6 @@ if __name__=="__main__":
     parser.add_argument("-r","--ref_csv")
     parser.add_argument("-d","--dest_path")
     parser.add_argument("-l","--log_int", default=10)
-    parser.add_argument("-lf", "--log_file")
 
     args = parser.parse_args()
 
