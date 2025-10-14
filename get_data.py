@@ -14,14 +14,18 @@ def download_data(reference_path, parent_dir, LOG_INTERVAL=10):
     CATALOG = pd.read_csv(reference_path)
     sub_folder = reference_path.split("/")[-1][:-4]
 
+    
+
     dest_path = os.path.join(parent_dir, sub_folder)
     if not os.path.exists(dest_path):
         os.makedirs(dest_path)
+        last_file_index = 0
     else:
-        last_file = [f for f in os.listdir(dest_path) if f.endswith('.jpg')][-1]
-        last_file_index = int(last_file.split('.')[0])
+        last_file = sorted([f for f in os.listdir(dest_path) if f.endswith('.fits')])[-1]
+        last_file_index = int(last_file.split('.')[0].split('_')[-1])
         print(f"Resuming from index {last_file_index}")
         CATALOG = CATALOG.iloc[last_file_index:]
+
 
     QUERY_FAIL = []
     IMAGE_FAIL = []
@@ -36,16 +40,16 @@ def download_data(reference_path, parent_dir, LOG_INTERVAL=10):
         for b in query_bands:
             try:
                 imgs = SDSS.get_images(coordinates=pos, radius=20*u.arcsec, band=b, data_release=17)
-                imgs[0].writeto(os.path.join(dest_path, f"{b}_{i+1:06}.fits"), overwrite=True)
+                imgs[0].writeto(os.path.join(dest_path, f"{b}_{i+1+last_file_index:06}.fits"), overwrite=True)
             except:
-                print(f"image not found :{i}", flush=True)
-                IMAGE_FAIL += [i]
+                print(f"image not found :{i+last_file_index}", flush=True)
+                IMAGE_FAIL += [i+last_file_index]
 
 
         # #JPEG
         url = f"https://skyserver.sdss.org/dr17/SkyServerWS/ImgCutout/getjpeg?ra={ra}&dec={dec}&scale=0.4&width=512&height=512"
         r = requests.get(url)
-        open(os.path.join(dest_path, f"{i+1:06}.jpg"), "wb").write(r.content)   
+        open(os.path.join(dest_path, f"{i+1+last_file_index:06}.jpg"), "wb").write(r.content)   
     
         if bar.n % LOG_INTERVAL == 0:
             print(str(bar), flush=True)
