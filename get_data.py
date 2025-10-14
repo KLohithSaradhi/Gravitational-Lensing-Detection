@@ -21,10 +21,10 @@ def download_data(reference_path, parent_dir, LOG_INTERVAL=10):
         os.makedirs(dest_path)
         last_file_index = 0
     else:
-        last_file = sorted([f for f in os.listdir(dest_path) if f.endswith('.fits')])[-1]
-        last_file_index = int(last_file.split('.')[0].split('_')[-1])
-        print(f"Resuming from index {last_file_index}")
-        CATALOG = CATALOG.iloc[last_file_index:]
+        existing_file_indices = [int(f.split('.')[0].split('_')[-1]) for f in os.listdir(dest_path) if f.endswith('.fits')]  
+        # last_file_index = int(last_file.split('.')[0].split('_')[-1])
+        # print(f"Resuming from index {last_file_index}")
+        # CATALOG = CATALOG.iloc[last_file_index:]
 
 
     QUERY_FAIL = []
@@ -33,6 +33,11 @@ def download_data(reference_path, parent_dir, LOG_INTERVAL=10):
 
 
     for i in bar:
+
+        if i+1 in existing_file_indices:
+            print(f"{i+1} already exists, skipping")
+            continue
+
         ra, dec = CATALOG.iloc[i]["ra"], CATALOG.iloc[i]["dec"]
 
         pos = coords.SkyCoord(ra, dec, unit="deg", frame="icrs")
