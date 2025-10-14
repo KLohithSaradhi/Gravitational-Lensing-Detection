@@ -17,6 +17,11 @@ def download_data(reference_path, parent_dir, LOG_INTERVAL=10):
     dest_path = os.path.join(parent_dir, sub_folder)
     if not os.path.exists(dest_path):
         os.makedirs(dest_path)
+    else:
+        last_file = [f for f in os.listdir(dest_path) if f.endswith('.jpg')][-1]
+        last_file_index = int(last_file.split('.')[0])
+        print(f"Resuming from index {last_file_index}")
+        CATALOG = CATALOG.iloc[last_file_index:]
 
     QUERY_FAIL = []
     IMAGE_FAIL = []
